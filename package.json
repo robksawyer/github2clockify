@@ -2,10 +2,21 @@
   "name": "github2clockify",
   "version": "1.0.0",
   "description": "Converts your Github logs to Clockify Timesheets",
-  "main": "index.js",
+  "main": "bin/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "github2clockify": "bin/index.js"
+  },
   "author": "Rob Sawyer",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "assert": "^2.0.0",
+    "boxen": "^5.0.0",
+    "chalk": "^4.1.0",
+    "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
+    "yargs": "^16.2.0"
+  }
 }
