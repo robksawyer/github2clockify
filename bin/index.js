@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// EXAMPLE Command: ./bin/index.js -n Rob Sawyer -p Test -c Test -t Development -e robksawyer@gmail.com -i ./test/my-commits.csv -o ./test.csv
+
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const yargs = require("yargs");
 const csv = require('csv-parser')
@@ -44,6 +46,8 @@ const csvWriter = createCsvWriter({
         {id: 'billable', title: 'Billable'},
         {id: 'start_date', title: 'Start Date'},
         {id: 'start_time', title: 'Start Time'},
+        // {id: 'end_date', title: 'End Date'},
+        // {id: 'end_time', title: 'End Time'},
         {id: 'duration', title: 'Duration (h)'},
     ]
 });
@@ -64,32 +68,40 @@ fs.createReadStream(options.input)
         const startVal = left[2]
         const endVal = right[2]
 
-        console.log(`Starting Time: ${startVal}`)
-        console.log(`Ending Time: ${endVal}`)
+        // console.log(`Starting Time: ${startVal}`)
+        // console.log(`Ending Time: ${endVal}`)
+
+        const description = right[right.length - 1]
+        // console.log(description)
 
         // Time adjustment
         const date1 = new Date(startVal);
         const date2 = new Date(endVal);
         const diffTime = Math.abs(date2 - date1);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-        console.log(diffTime + " milliseconds");
-        console.log(diffDays + " days");
+        // console.log(diffTime + " milliseconds");
+        // console.log(diffDays + " days");
 
        
        
         const startDate = date1.getMonth() + '/' + date1.getDate() + '/' + date1.getFullYear();
         const startTime = formatAMPM(date1);
+        const endDate = date2.getMonth() + '/' + date2.getDate() + '/' + date2.getFullYear();
+        const endTime = formatAMPM(date2);
         // const endDate = date2.getMonth() + '/' + date2.getDate() + '/' + date2.getFullYear()
 
         return {
             project: options.project,
             client: options.client,
+            description: description,
             task: options.task,
             email: options.email,
             tags: options.tags,
             billable: options.billable || 'Yes', // Default to billable
-            start_date: startDate,
+            start_date: padZeros(date1),
             start_time: startTime,
+            // end_date: padZeros(date1),
+            // end_time: endTime,
             duration: msToTime(diffTime), // Convert from ms to nice time
         }
     })
@@ -112,8 +124,17 @@ fs.createReadStream(options.input)
   });
 
 
+/**
+ * padZeros
+ * @param {*} date 
+ * MM/DD/YYYY
+ */
+function padZeros(date) {
+    return ('0' + (date.getMonth()+1)).slice(-2) + '/'
+             + ('0' + date.getDate()).slice(-2) + '/'
+             + date.getFullYear();
+}
 
-// console.log(githubLogResults);
 
 /**
  * formatAMPM
@@ -123,12 +144,13 @@ fs.createReadStream(options.input)
 function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
     var ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? '0'+minutes : minutes;
-    var strTime = hours + ':' + minutes + ' ' + ampm;
-    return strTime;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    return hours + ':' + minutes + ':' + seconds + ' ' + ampm;
 }
 
 /**
@@ -142,9 +164,10 @@ function msToTime(duration) {
         minutes = Math.floor((duration / (1000 * 60)) % 60),
         hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
 
-    hours = (hours < 10) ? "0" + hours : hours;
+    hours = (hours < 10) ? hours : hours;
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;
+    // milliseconds = (milliseconds < 10) ? "0" + milliseconds : milliseconds;
 
     return hours + ":" + minutes + ":" + seconds;
 }
